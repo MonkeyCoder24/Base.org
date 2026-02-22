@@ -1,0 +1,14 @@
+/* Ghana-themed variables for this page */
+:root{
+  --bg:#ffffff;
+  --primary:#006B3F; /* green */
+  --accent:#FFB612;  /* gold */
+  --accent-2:#C8102E; /* red */
+  --muted:#222222;
+}
+
+body.where-we-stand{background:linear-gradient(180deg, #fff7e6 0%, #ffffff 100%);color:var(--muted)}
+
+.wws-hero{background:linear-gradient(90deg,var(--accent-2),var(--accent),var(--primary));color:#fff;padding:48px 0}
+
+.wws-cta{background:var(--accent);color:#000;padding:12px 18px;border-radius:6px;text-decoration:none}
