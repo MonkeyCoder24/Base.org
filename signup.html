@@ -67,7 +67,7 @@
     try {
       const apiUrl = window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1')
         ? `${window.location.origin}/api/signup`
-        : 'http://11.27.255.59:3000/api/signup';
+        : 'https://ghana-base.onrender.com/api/signup';
 
       const response = await fetch(apiUrl, {
         method: 'POST',
