@@ -43,3 +43,12 @@ body{font-family:Roboto, system-ui, -apple-system, 'Segoe UI', Arial;margin:0;ba
   .card-wrap{flex-direction:column;align-items:center}
   .small-card{order:2}
 }
+
+/* Message notifications */
+.message{
+  padding:12px 14px;border-radius:6px;margin-top:12px;text-align:center;font-weight:500;display:none;
+}
+.message.success{background:#d4edda;color:#155724;display:block}
+.message.error{background:#f8d7da;color:#721c24;display:block}
+.message.hidden{display:none}
+
