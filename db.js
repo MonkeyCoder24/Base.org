@@ -67,3 +67,16 @@ export function getAllSignups(db) {
     });
   });
 }
+
+export function checkDuplicate(db, email, first_name, last_name) {
+  return new Promise((resolve, reject) => {
+    const query = 'SELECT * FROM signups WHERE email = ? AND first_name = ? AND last_name = ?';
+    db.get(query, [email, first_name, last_name], (err, row) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(row || null);
+    });
+  });
+}

@@ -65,7 +65,11 @@
     const data = Object.fromEntries(formData);
 
     try {
-      const response = await fetch('/api/signup', {
+      const apiUrl = window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1')
+        ? `${window.location.origin}/api/signup`
+        : 'http://11.27.255.59:3000/api/signup';
+
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)

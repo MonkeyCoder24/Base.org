@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import { initDb, saveSignup, getAllSignups } from './db.js';
+import { initDb, saveSignup, getAllSignups, checkDuplicate } from './db.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -40,6 +40,14 @@ app.post('/api/signup', async (req, res) => {
     if (!first || !last || !email || !region || !constituency) {
       return res.status(400).json({
         error: 'Missing required fields: first, last, email, region, constituency'
+      });
+    }
+
+    // Check for duplicates
+    const duplicate = await checkDuplicate(db, email, first, last);
+    if (duplicate) {
+      return res.status(409).json({
+        error: 'This signup already exists. Please use different information.'
       });
     }
 
