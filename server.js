@@ -15,8 +15,8 @@ let db = null;
 
 // Initialize database on startup
 initDb()
-  .then((database) => {
-    db = database;
+  .then((pool) => {
+    db = pool;
     console.log('Database initialized.');
   })
   .catch((err) => {

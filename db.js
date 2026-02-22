@@ -1,23 +1,20 @@
-import sqlite3 from 'sqlite3';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import pg from 'pg';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const { Pool } = pg;
 
-const dbPath = path.join(__dirname, 'signups.db');
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+});
 
 export function initDb() {
-  return new Promise((resolve, reject) => {
-    const db = new sqlite3.Database(dbPath, (err) => {
-      if (err) {
-        reject(err);
-        return;
-      }
+  return new Promise(async (resolve, reject) => {
+    try {
+      const client = await pool.connect();
       
-      db.run(`
+      await client.query(`
         CREATE TABLE IF NOT EXISTS signups (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          id SERIAL PRIMARY KEY,
           first_name TEXT NOT NULL,
           last_name TEXT NOT NULL,
           email TEXT NOT NULL,
@@ -25,58 +22,55 @@ export function initDb() {
           phone TEXT,
           region TEXT NOT NULL,
           constituency TEXT NOT NULL,
-          created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
-      `, (err) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-        resolve(db);
-      });
-    });
+      `);
+      
+      client.release();
+      resolve(pool);
+    } catch (err) {
+      reject(err);
+    }
   });
 }
 
-export function saveSignup(db, data) {
-  return new Promise((resolve, reject) => {
-    const { first_name, last_name, email, birth_date, phone, region, constituency } = data;
-    const query = `
-      INSERT INTO signups (first_name, last_name, email, birth_date, phone, region, constituency)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `;
-    
-    db.run(query, [first_name, last_name, email, birth_date || null, phone || null, region, constituency], function(err) {
-      if (err) {
-        reject(err);
-        return;
-      }
-      resolve({ id: this.lastID, message: 'Signup saved successfully' });
-    });
+export function saveSignup(pool, data) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const { first_name, last_name, email, birth_date, phone, region, constituency } = data;
+      const query = `
+        INSERT INTO signups (first_name, last_name, email, birth_date, phone, region, constituency)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        RETURNING id
+      `;
+      
+      const result = await pool.query(query, [first_name, last_name, email, birth_date || null, phone || null, region, constituency]);
+      resolve({ id: result.rows[0].id, message: 'Signup saved successfully' });
+    } catch (err) {
+      reject(err);
+    }
   });
 }
 
-export function getAllSignups(db) {
-  return new Promise((resolve, reject) => {
-    db.all('SELECT * FROM signups ORDER BY created_at DESC', (err, rows) => {
-      if (err) {
-        reject(err);
-        return;
-      }
-      resolve(rows || []);
-    });
+export function getAllSignups(pool) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const result = await pool.query('SELECT * FROM signups ORDER BY created_at DESC');
+      resolve(result.rows || []);
+    } catch (err) {
+      reject(err);
+    }
   });
 }
 
-export function checkDuplicate(db, email, first_name, last_name) {
-  return new Promise((resolve, reject) => {
-    const query = 'SELECT * FROM signups WHERE email = ? AND first_name = ? AND last_name = ?';
-    db.get(query, [email, first_name, last_name], (err, row) => {
-      if (err) {
-        reject(err);
-        return;
-      }
-      resolve(row || null);
-    });
+export function checkDuplicate(pool, email, first_name, last_name) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const query = 'SELECT * FROM signups WHERE email = $1 AND first_name = $2 AND last_name = $3';
+      const result = await pool.query(query, [email, first_name, last_name]);
+      resolve(result.rows[0] || null);
+    } catch (err) {
+      reject(err);
+    }
   });
 }
