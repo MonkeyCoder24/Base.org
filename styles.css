@@ -91,3 +91,17 @@ footer .footer-links a{color:var(--muted);text-decoration:none}
   .features-grid{grid-template-columns:1fr;gap:18px}
   .side-links{position:static;flex-direction:row;gap:12px;margin-top:18px}
 }
+/* Embedded forms */
+iframe {
+  max-width: 100%;
+  border: none;
+  border-radius: 6px;
+  box-shadow: 0 6px 18px rgba(2,6,23,0.08);
+}
+
+@media (max-width:768px){
+  iframe {
+    width: 100% !important;
+    height: auto !important;
+  }
+}
